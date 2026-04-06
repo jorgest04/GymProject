@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Gimnasio{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'gym/style.css' %}">
+</head>
+<body>
+  <header class="topbar" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; background-color: #2c3e50; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <img src="{% static 'gym/imgs/logo.jpg' %}" alt="Logo Gym" style="height: 50px; width: auto; border-radius: 5px; background: white; padding: 2px; box-shadow: 0 0 15px rgba(255,255,255,0.3);">
+        <span class="brand" style="font-size: 1.6rem; font-weight: 800; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">GYM PROJECT</span>
+    </div>
+    <nav class="nav-links">
+      {% if user.is_authenticated %}
+        {% if gym_role == 'admin' %}
+          <a href="{% url 'gym:admin_dashboard' %}" class="btn-nav">🏠 Panel</a>
+          <a href="{% url 'gym:admin_asistencias' %}" class="btn-nav">📋 Asistencias</a>
+          <a href="{% url 'gym:admin_planes' %}" class="btn-nav">💰 Pagos</a>
+        {% else %}
+          <a href="{% url 'gym:alumno_portal' %}" class="btn-nav">💪 Mi Gimnasio</a>
+          <a href="{% url 'gym:alumno_perfil' %}" class="btn-nav">👤 Perfil</a>
+        {% endif %}
+        <a href="{% url 'gym:logout' %}" style="color: #e74c3c; font-weight: 600;">🚪 Salir</a>
+      {% else %}
+        <a href="{% url 'gym:login' %}" style="color: #fff; text-decoration: none; border: 2px solid #fff; padding: 5px 15px; border-radius: 20px;">Entrar</a>
+      {% endif %}
+    </nav>
+  </header>
+  <style>
+    .btn-nav {
+      color: white; text-decoration: none; font-weight: 500; margin: 0 10px; transition: color 0.3s;
+    }
+    .btn-nav:hover {
+      color: #3498db;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+  </style>
+  <main class="wrap">
+    {% if messages %}
+      <ul class="messages">
+        {% for m in messages %}
+          <li>{{ m }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

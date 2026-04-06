@@ -1,0 +1,77 @@
+{% extends "gym/base.html" %}
+{% block title %}Panel administrador{% endblock %}
+{% block content %}
+<h1>🏢 Panel de Gestión del Gimnasio</h1>
+
+<div class="grid-stats">
+  <div class="stat" style="border-left: 5px solid #3498db;">
+    <strong>{{ asistencias_hoy }}</strong>
+    <span>Asistencias Hoy</span>
+  </div>
+  <div class="stat" style="border-left: 5px solid #9b59b6;">
+    <strong>{{ asistencias_semana }}</strong>
+    <span>Esta Semana</span>
+  </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+    <!-- Lista de Alumnos -->
+    <div class="card">
+      <h2>👥 Gestión de Alumnos y Planes</h2>
+      <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+        <a href="{% url 'gym:admin_asistencia_nueva' %}" class="btn btn-primary">➕ Asistencia</a>
+        <a href="{% url 'gym:admin_plan_nuevo' %}" class="btn btn-primary">💰 Nuevo Plan</a>
+        <a href="{% url 'gym:admin_crear_alumno' %}" class="btn">👤 Nuevo Alumno</a>
+      </div>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Alumno</th>
+            <th>Estado</th>
+            <th style="text-align: right;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in alumnos %}
+            {% with p=u.gym_profile %}
+            <tr>
+              <td>
+                <strong>{{ u.get_full_name|default:u.username }}</strong><br>
+                <small style="color: #7f8c8d;">{{ u.username }}</small>
+              </td>
+              <td>
+                {% if p.plan_congelado %}
+                  <span class="badge badge-muted">❄️ Congelado</span>
+                {% else %}
+                  <span class="badge badge-primary">✅ Activo</span>
+                {% endif %}
+              </td>
+              <td style="text-align: right;">
+                <div style="display: flex; gap: 5px; justify-content: flex-end;">
+                  <a href="{% url 'gym:admin_evaluacion_alumno' u.id %}" class="btn btn-sm" title="Evaluación Física">📏 Eval.</a>
+                  <a href="{% url 'gym:admin_planes' %}?alumno={{ u.id }}" class="btn btn-sm" title="Pagos">💸 Pagos</a>
+                </div>
+              </td>
+            </tr>
+            {% endwith %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Últimas Observaciones -->
+    <div class="card" style="border-top: 5px solid #e67e22;">
+      <h2>📝 Notas de Progreso</h2>
+      {% for nota in ultimas_notas %}
+        <div style="border-bottom: 1px solid #eee; padding: 10px 0;">
+            <strong>{{ nota.user.get_full_name|default:nota.user.username }}</strong>
+            <p style="font-size: 0.9rem; font-style: italic; color: #34495e; margin: 5px 0;">"{{ nota.observaciones|truncatechars:100 }}"</p>
+        </div>
+      {% empty %}
+        <p class="sub">No hay observaciones recientes.</p>
+      {% endfor %}
+      <a href="{% url 'gym:admin_asistencias_resumen' %}" style="display: block; margin-top: 15px; text-align: center;">Ver estadísticas generales</a>
+    </div>
+</div>
+{% endblock %}

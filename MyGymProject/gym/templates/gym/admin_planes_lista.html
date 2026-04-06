@@ -1,0 +1,67 @@
+{% extends "gym/base.html" %}
+{% block title %}Planes de pago{% endblock %}
+{% block content %}
+<h1>Gestión de Planes y Pagos</h1>
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'gym:admin_plan_nuevo' %}" class="btn btn-primary">➕ Crear Nuevo Plan</a>
+    <a href="{% url 'gym:admin_dashboard' %}" class="btn">🏠 Volver al Panel</a>
+</div>
+
+{% for plan in planes %}
+  <div class="card" id="plan-{{ plan.alumno.id }}">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
+        <h2 style="margin: 0;">{{ plan.alumno.get_full_name|default:plan.alumno.username }}</h2>
+        <span class="badge {% if plan.alumno.gym_profile.servicio_finalizado %}badge-danger{% else %}badge-primary{% endif %}">
+            {% if plan.alumno.gym_profile.servicio_finalizado %}Servicio Finalizado{% else %}Plan Activo{% endif %}
+        </span>
+    </div>
+    
+    <p><strong>Total del Plan:</strong> <span style="font-size: 1.2rem; color: #2c3e50;">S/. {{ plan.monto_total }}</span> ({{ plan.num_cuotas }} cuotas)</p>
+    <p class="sub">Fecha de creación: {{ plan.creado|date:"d/m/Y" }}</p>
+    
+    <table style="margin-top: 15px;">
+      <thead>
+        <tr>
+          <th>Cuota</th>
+          <th>Monto</th>
+          <th>Vencimiento</th>
+          <th>Estado</th>
+          <th style="text-align: right;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in plan.cuotas.all %}
+          <tr>
+            <td>Cuota {{ c.numero }}</td>
+            <td><strong>S/. {{ c.monto }}</strong></td>
+            <td>
+                {{ c.fecha_vencimiento|date:"d/m/Y" }}
+                {% if not c.pagado and c.fecha_vencimiento < today %}
+                    <br><small style="color: #e74c3c;">⚠️ Vencida</small>
+                {% endif %}
+            </td>
+            <td>
+                {% if c.pagado %}
+                    <span style="color: #27ae60;">✅ Pagada</span>
+                    <br><small>{{ c.fecha_pago|date:"d/m/Y" }}</small>
+                {% else %}
+                    <span style="color: #e67e22;">⏳ Pendiente</span>
+                {% endif %}
+            </td>
+            <td style="text-align: right;">
+              {% if not c.pagado %}
+                <form method="post" action="{% url 'gym:admin_cuota_pagar' c.pk %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-primary">Marcar Pagada</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% empty %}
+  <p>No se encontraron planes de pago registrados.</p>
+{% endfor %}
+{% endblock %}

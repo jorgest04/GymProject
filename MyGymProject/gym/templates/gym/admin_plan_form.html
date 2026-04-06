@@ -1,0 +1,18 @@
+{% extends "gym/base.html" %}
+{% block title %}Nuevo plan de pago{% endblock %}
+{% block content %}
+<h1>Nuevo plan de pago</h1>
+<p class="sub">El importe total se divide en 1 a 4 cuotas con vencimientos calculados a partir de la primera fecha.</p>
+<form method="post">
+  {% csrf_token %}
+  {{ form.alumno.label_tag }}{{ form.alumno }}{{ form.alumno.errors }}
+  {{ form.monto_total.label_tag }}{{ form.monto_total }}{{ form.monto_total.errors }}
+  {{ form.num_cuotas.label_tag }}{{ form.num_cuotas }}{{ form.num_cuotas.errors }}
+  {{ form.primera_cuota.label_tag }}{{ form.primera_cuota }}{{ form.primera_cuota.errors }}
+  {{ form.dias_entre_cuotas.label_tag }}{{ form.dias_entre_cuotas }}{{ form.dias_entre_cuotas.errors }}
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Crear plan y cuotas</button>
+    <a class="btn btn-ghost" href="{% url 'gym:admin_dashboard' %}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

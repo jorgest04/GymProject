@@ -1,0 +1,13 @@
+{% extends "gym/base.html" %}
+{% block title %}Congelar plan{% endblock %}
+{% block content %}
+<h1>Congelar plan</h1>
+<p class="sub">El contador de las 4 semanas del servicio personalizado dejará de avanzar hasta que reactive el plan.</p>
+<form method="post">
+  {% csrf_token %}
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Confirmar congelación</button>
+    <a class="btn btn-ghost" href="{% url 'gym:alumno_portal' %}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

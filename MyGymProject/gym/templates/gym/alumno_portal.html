@@ -1,0 +1,99 @@
+{% extends "gym/base.html" %}
+{% block title %}Mi Gimnasio - Panel Alumno{% endblock %}
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px;">
+    <h1>🏠 Bienvenido a tu Gimnasio</h1>
+    <div style="background: #27ae60; color: white; padding: 10px 20px; border-radius: 50px; font-weight: bold;">
+        💪 {{ profile.user.get_full_name|default:profile.user.username }}
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+    <!-- Imagen Decorativa -->
+    <div style="border-radius: 15px; overflow: hidden; height: 100%;">
+        <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=800" 
+             alt="Gimnasio" 
+             style="width: 100%; height: 100%; object-fit: cover;">
+    </div>
+
+    <!-- Estadísticas y Datos -->
+    <div>
+        <div class="grid-stats">
+            <div class="stat" style="background: #f1f8e9; border-bottom: 4px solid #43a047;">
+                <strong>{{ mis_asistencias.count }}</strong>
+                <span>Total Asistencias</span>
+            </div>
+            <div class="stat" style="background: #fff3e0; border-bottom: 4px solid #fb8c00;">
+                <strong>{% if profile.plan_congelado %}❄️ Sí{% else %}✅ No{% endif %}</strong>
+                <span>Estado de Congelación</span>
+            </div>
+        </div>
+
+        <div class="card" style="border-top: 5px solid #2980b9;">
+            <h2>📈 Tu Progreso Físico (Medido por Admin)</h2>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px;">
+                <div style="text-align: center; background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                    <span style="font-size: 0.8rem; color: #7f8c8d; display: block;">Peso</span>
+                    <strong style="font-size: 1.2rem; color: #2c3e50;">{{ profile.peso_kg|default:"--" }} kg</strong>
+                </div>
+                <div style="text-align: center; background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                    <span style="font-size: 0.8rem; color: #7f8c8d; display: block;">Talla</span>
+                    <strong style="font-size: 1.2rem; color: #2c3e50;">{{ profile.talla_cm|default:"--" }} cm</strong>
+                </div>
+                <div style="text-align: center; background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                    <span style="font-size: 0.8rem; color: #7f8c8d; display: block;">Grasa %</span>
+                    <strong style="font-size: 1.2rem; color: #2c3e50;">{{ profile.porcentaje_grasa|default:"--" }}%</strong>
+                </div>
+                <div style="text-align: center; background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                    <span style="font-size: 0.8rem; color: #7f8c8d; display: block;">Músculo kg</span>
+                    <strong style="font-size: 1.2rem; color: #2c3e50;">{{ profile.masa_muscular_kg|default:"--" }}</strong>
+                </div>
+            </div>
+            
+            {% if profile.observaciones %}
+            <div style="margin-top: 20px; background: #e3f2fd; padding: 15px; border-radius: 10px; border-left: 5px solid #2196f3;">
+                <strong style="color: #1976d2;">📝 Observaciones del entrenador:</strong>
+                <p style="margin: 10px 0 0 0; font-style: italic;">"{{ profile.observaciones }}"</p>
+            </div>
+            {% endif %}
+            
+            <p style="text-align: right; margin-top: 15px;">
+                <a href="{% url 'gym:alumno_perfil' %}" class="btn btn-sm btn-ghost">Editar mis datos básicos (WhatsApp, Edad)</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 20px; border-top: 5px solid #f1c40f;">
+    <h2>💰 Mis Planes y Pagos Pendientes</h2>
+    <table style="width: 100%;">
+        <thead>
+            <tr><th>Plan #</th><th>Importe</th><th>Vencimiento</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+            {% for c in cuotas %}
+            <tr>
+                <td>{{ c.numero }} / {{ c.plan.num_cuotas }}</td>
+                <td><strong>S/. {{ c.monto }}</strong></td>
+                <td>{{ c.fecha_vencimiento|date:"d/m/Y" }}</td>
+                <td>
+                    {% if c.pagado %}
+                        <span style="color: #27ae60;">✅ Pagado ({{ c.fecha_pago|date:"d/m/Y" }})</span>
+                    {% else %}
+                        <span style="color: #e67e22;">⏳ Pendiente</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div style="display: flex; gap: 10px; margin-top: 20px;">
+    {% if profile.plan_congelado %}
+        <a class="btn btn-primary" href="{% url 'gym:alumno_descongelar' %}">🔥 Descongelar y volver a entrenar</a>
+    {% else %}
+        <a class="btn btn-ghost" href="{% url 'gym:alumno_congelar' %}">❄️ Congelar mi plan</a>
+    {% endif %}
+</div>
+{% endblock %}

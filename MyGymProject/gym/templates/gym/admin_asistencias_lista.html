@@ -1,0 +1,21 @@
+{% extends "gym/base.html" %}
+{% block title %}Asistencias{% endblock %}
+{% block content %}
+<h1>Asistencias recientes</h1>
+<p><a href="{% url 'gym:admin_asistencia_nueva' %}">+ Nueva</a> · <a href="{% url 'gym:admin_dashboard' %}">Panel</a></p>
+<table>
+  <thead>
+    <tr><th>Fecha</th><th>Alumno</th></tr>
+  </thead>
+  <tbody>
+    {% for a in asistencias %}
+      <tr>
+        <td>{{ a.fecha|date:"d/m/Y" }}</td>
+        <td>{{ a.alumno.get_full_name|default:a.alumno.username }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="2">Sin registros.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

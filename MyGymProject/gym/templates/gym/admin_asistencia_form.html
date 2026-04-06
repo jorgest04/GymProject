@@ -1,0 +1,17 @@
+{% extends "gym/base.html" %}
+{% block title %}Registrar asistencia{% endblock %}
+{% block content %}
+<h1>Registrar asistencia</h1>
+<form method="post">
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+    <div class="alert alert-warn">{{ form.non_field_errors }}</div>
+  {% endif %}
+  {{ form.alumno.label_tag }}{{ form.alumno }}{{ form.alumno.errors }}
+  {{ form.fecha.label_tag }}{{ form.fecha }}{{ form.fecha.errors }}
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a class="btn btn-ghost" href="{% url 'gym:admin_dashboard' %}">Volver</a>
+  </div>
+</form>
+{% endblock %}

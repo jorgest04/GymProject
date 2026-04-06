@@ -1,0 +1,13 @@
+{% extends "gym/base.html" %}
+{% block title %}Reactivar plan{% endblock %}
+{% block content %}
+<h1>Reactivar plan</h1>
+<p class="sub">Los días transcurridos mientras el plan estaba congelado se descontarán del cómputo de las 4 semanas.</p>
+<form method="post">
+  {% csrf_token %}
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Reactivar</button>
+    <a class="btn btn-ghost" href="{% url 'gym:alumno_portal' %}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

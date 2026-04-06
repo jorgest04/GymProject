@@ -1,0 +1,16 @@
+{% extends "gym/base.html" %}
+{% block title %}Servicio personalizado{% endblock %}
+{% block content %}
+<h1>Servicio personalizado — {{ alumno.get_full_name|default:alumno.username }}</h1>
+<p class="sub">La cuenta de 4 semanas (28 días efectivos) arranca en la fecha indicada. Los días en congelación (desde el panel del alumno) no cuentan.</p>
+<form method="post">
+  {% csrf_token %}
+  {{ form.servicio_personalizado_inicio.label_tag }}
+  {{ form.servicio_personalizado_inicio }}
+  {{ form.servicio_personalizado_inicio.errors }}
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a class="btn btn-ghost" href="{% url 'gym:admin_dashboard' %}">Volver</a>
+  </div>
+</form>
+{% endblock %}

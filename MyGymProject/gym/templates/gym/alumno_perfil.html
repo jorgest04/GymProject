@@ -1,0 +1,21 @@
+{% extends "gym/base.html" %}
+{% block title %}Mis datos{% endblock %}
+{% block content %}
+<h1>Mis datos personales</h1>
+<p class="sub">Nombre, edad, fecha de nacimiento, peso, talla, correo y WhatsApp.</p>
+<form method="post">
+  {% csrf_token %}
+  {{ form.first_name.label_tag }}{{ form.first_name }}{{ form.first_name.errors }}
+  {{ form.last_name.label_tag }}{{ form.last_name }}{{ form.last_name.errors }}
+  {{ form.email.label_tag }}{{ form.email }}{{ form.email.errors }}
+  {{ form.edad.label_tag }}{{ form.edad }}{{ form.edad.errors }}
+  {{ form.fecha_nacimiento.label_tag }}{{ form.fecha_nacimiento }}{{ form.fecha_nacimiento.errors }}
+  {{ form.peso_kg.label_tag }}{{ form.peso_kg }}{{ form.peso_kg.errors }}
+  {{ form.talla_cm.label_tag }}{{ form.talla_cm }}{{ form.talla_cm.errors }}
+  {{ form.whatsapp.label_tag }}{{ form.whatsapp }}{{ form.whatsapp.errors }}
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a class="btn btn-ghost" href="{% url 'gym:alumno_portal' %}">Volver</a>
+  </div>
+</form>
+{% endblock %}

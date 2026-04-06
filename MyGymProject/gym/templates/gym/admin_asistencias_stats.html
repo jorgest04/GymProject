@@ -1,0 +1,22 @@
+{% extends "gym/base.html" %}
+{% block title %}Resumen asistencias{% endblock %}
+{% block content %}
+<h1>Asistencias acumuladas por alumno</h1>
+<p><a href="{% url 'gym:admin_dashboard' %}">Volver al panel</a></p>
+<table>
+  <thead>
+    <tr><th>Usuario</th><th>Nombre</th><th>Total registros</th></tr>
+  </thead>
+  <tbody>
+    {% for row in data %}
+      <tr>
+        <td>{{ row.alumno__username }}</td>
+        <td>{{ row.alumno__first_name }}</td>
+        <td>{{ row.total }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="3">Sin datos.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "gym/base.html" %}
+{% block title %}Crear alumno{% endblock %}
+{% block content %}
+<h1>Crear usuario alumno</h1>
+<form method="post">
+  {% csrf_token %}
+  {% for field in form %}
+    {{ field.label_tag }}{{ field }}{{ field.errors }}
+  {% endfor %}
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Crear</button>
+    <a class="btn btn-ghost" href="{% url 'gym:admin_dashboard' %}">Volver</a>
+  </div>
+</form>
+{% endblock %}
