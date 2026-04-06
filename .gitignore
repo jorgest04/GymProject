@@ -1,0 +1,25 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+db.sqlite3
+media
+local_settings.py
+
+# Entorno Virtual
+venv/
+ENV/
+env/
+
+# Variables de entorno (CRÍTICO)
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
