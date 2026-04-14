@@ -16,6 +16,7 @@ from .forms import (
     PerfilAlumnoForm,
     PlanPagoForm,
     ServicioPersonalizadoForm,
+    EditarAlumnoForm,
 )
 from .models import Asistencia, Cuota, PlanPago, Profile, EvaluacionFisica
 
@@ -99,14 +100,47 @@ def admin_asistencias_lista(request):
     qs = qs.order_by("-fecha")[:200]
     return render(request, "gym/admin_asistencias_lista.html", {"asistencias": qs})
 
+from decimal import Decimal, ROUND_HALF_UP
+
 @admin_required
 def admin_plan_pago_nuevo(request):
-    form = PlanPagoForm(request.POST or None)
+    user_id = request.GET.get("alumno")
+    alumno = get_object_or_404(User, pk=user_id) if user_id else None
+    form = PlanPagoForm(request.POST or None, initial={"alumno": alumno})
+    
     if request.method == "POST" and form.is_valid():
-        form.save(commit=True)
-        messages.success(request, "Plan de pago y cuotas creados.")
+        plan = form.save()
+        n = plan.num_cuotas
+        total = plan.monto_total
+        per = (total / n).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        acum = Decimal("0")
+        
+        # En esta versión, generamos las cuotas. 
+        # La personalización de fechas se hace aquí mismo recibiendo listas del POST si fuera necesario,
+        # pero para mayor control, dejaremos que se creen y el admin las edite en la lista de planes.
+        for i in range(1, n + 1):
+            if i == n: monto = total - acum
+            else:
+                monto = per
+                acum += monto
+            
+            # Fecha personalizada: si viene del POST como 'fecha_1', 'fecha_2', etc.
+            f_key = f"fecha_{i}"
+            fecha_venc = request.POST.get(f_key)
+            if not fecha_venc:
+                fecha_venc = timezone.localdate() + timedelta(days=30 * (i-1))
+            
+            Cuota.objects.create(
+                plan=plan,
+                numero=i,
+                monto=monto,
+                fecha_vencimiento=fecha_venc,
+            )
+        
+        messages.success(request, f"Plan personalizado creado para {plan.alumno.first_name}.")
         return redirect("gym:admin_planes")
-    return render(request, "gym/admin_plan_form.html", {"form": form})
+    
+    return render(request, "gym/admin_plan_form.html", {"form": form, "alumno": alumno})
 
 @admin_required
 def admin_planes_lista(request):
@@ -167,6 +201,21 @@ def admin_crear_alumno(request):
         messages.success(request, f"Alumno «{u.username}» creado.")
         return redirect("gym:admin_dashboard")
     return render(request, "gym/admin_crear_alumno.html", {"form": form})
+
+@admin_required
+def admin_editar_alumno(request, user_id):
+    alumno = get_object_or_404(User, pk=user_id)
+    profile = alumno.gym_profile
+    form = EditarAlumnoForm(request.POST or None, instance=profile, user=alumno)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        alumno.first_name = form.cleaned_data["first_name"]
+        alumno.last_name = form.cleaned_data["last_name"]
+        alumno.email = form.cleaned_data["email"]
+        alumno.save()
+        messages.success(request, f"Datos de {alumno.username} actualizados.")
+        return redirect("gym:admin_dashboard")
+    return render(request, "gym/admin_crear_alumno.html", {"form": form, "titulo": f"Editar Alumno: {alumno.username}"})
 
 @admin_required
 def admin_asistencias_por_alumno(request):

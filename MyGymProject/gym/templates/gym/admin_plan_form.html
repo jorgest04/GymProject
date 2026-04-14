@@ -1,18 +1,74 @@
 {% extends "gym/base.html" %}
-{% block title %}Nuevo plan de pago{% endblock %}
+{% block title %}Nuevo plan de pago personalizado{% endblock %}
 {% block content %}
-<h1>Nuevo plan de pago</h1>
-<p class="sub">El importe total se divide en 1 a 4 cuotas con vencimientos calculados a partir de la primera fecha.</p>
-<form method="post">
-  {% csrf_token %}
-  {{ form.alumno.label_tag }}{{ form.alumno }}{{ form.alumno.errors }}
-  {{ form.monto_total.label_tag }}{{ form.monto_total }}{{ form.monto_total.errors }}
-  {{ form.num_cuotas.label_tag }}{{ form.num_cuotas }}{{ form.num_cuotas.errors }}
-  {{ form.primera_cuota.label_tag }}{{ form.primera_cuota }}{{ form.primera_cuota.errors }}
-  {{ form.dias_entre_cuotas.label_tag }}{{ form.dias_entre_cuotas }}{{ form.dias_entre_cuotas.errors }}
-  <div class="form-actions">
-    <button type="submit" class="btn btn-primary">Crear plan y cuotas</button>
-    <a class="btn btn-ghost" href="{% url 'gym:admin_dashboard' %}">Cancelar</a>
-  </div>
-</form>
+<div class="card" style="max-width: 600px; margin: 0 auto; border-top: 5px solid #3498db;">
+    <h1>💰 Nuevo Plan para: {{ alumno.get_full_name|default:alumno.username }}</h1>
+    <p class="sub">Personaliza el monto total y las fechas de vencimiento de cada cuota.</p>
+    
+    <form method="post" id="planForm">
+      {% csrf_token %}
+      {{ form.alumno }}
+      
+      <div style="margin-bottom: 20px;">
+        <label>Monto Total del Plan (S/.)</label>
+        {{ form.monto_total }}
+        {{ form.monto_total.errors }}
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label>Número de Cuotas</label>
+        {{ form.num_cuotas }}
+        {{ form.num_cuotas.errors }}
+      </div>
+
+      <div id="cuotasContainer" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <h3 style="margin-top: 0; font-size: 1rem;">📅 Fechas de Vencimiento</h3>
+        <div id="cuotasInputs">
+            <!-- Se generará dinámicamente con JS -->
+        </div>
+      </div>
+
+      <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end;">
+        <a class="btn btn-ghost" href="{% url 'gym:admin_dashboard' %}">Cancelar</a>
+        <button type="submit" class="btn btn-primary">💾 Guardar Plan Personalizado</button>
+      </div>
+    </form>
+</div>
+
+<script>
+    const numCuotasInput = document.getElementById('id_num_cuotas');
+    const cuotasInputsDiv = document.getElementById('cuotasInputs');
+
+    function updateCuotas() {
+        const n = parseInt(numCuotasInput.value) || 0;
+        cuotasInputsDiv.innerHTML = '';
+        
+        let today = new Date();
+        
+        for (let i = 1; i <= n; i++) {
+            const div = document.createElement('div');
+            div.style.marginBottom = '10px';
+            div.style.display = 'flex';
+            div.style.alignItems = 'center';
+            div.style.gap = '10px';
+            
+            // Calcular fecha por defecto (hoy + 30*i días)
+            let defaultDate = new Date();
+            defaultDate.setDate(today.getDate() + (30 * (i - 1)));
+            let dateStr = defaultDate.toISOString().split('T')[0];
+
+            div.innerHTML = `
+                <span style="min-width: 80px; font-weight: bold;">Cuota ${i}:</span>
+                <input type="date" name="fecha_${i}" value="${dateStr}" class="input" required style="flex: 1;">
+            `;
+            cuotasInputsDiv.appendChild(div);
+        }
+    }
+
+    numCuotasInput.addEventListener('change', updateCuotas);
+    numCuotasInput.addEventListener('keyup', updateCuotas);
+    
+    // Inicializar
+    updateCuotas();
+</script>
 {% endblock %}

@@ -86,62 +86,42 @@ class AsistenciaForm(forms.ModelForm):
         return cleaned
 
 
-class PlanPagoForm(forms.ModelForm):
-    primera_cuota = forms.DateField(
-        label="Vencimiento primera cuota",
-        widget=forms.DateInput(attrs={"type": "date", "class": "input"}),
-    )
-    dias_entre_cuotas = forms.IntegerField(
-        label="Días entre cuotas",
-        initial=30,
-        min_value=1,
-        max_value=365,
-        widget=forms.NumberInput(attrs={"class": "input"}),
-    )
+class EditarAlumnoForm(forms.ModelForm):
+    first_name = forms.CharField(label="Nombre", max_length=150, required=True, widget=forms.TextInput(attrs={"class": "input"}))
+    last_name = forms.CharField(label="Apellidos", max_length=150, required=False, widget=forms.TextInput(attrs={"class": "input"}))
+    email = forms.EmailField(label="Correo", required=False, widget=forms.EmailInput(attrs={"class": "input"}))
 
+    class Meta:
+        model = Profile
+        fields = ("whatsapp", "edad", "fecha_nacimiento")
+        widgets = {
+            "whatsapp": forms.TextInput(attrs={"class": "input"}),
+            "edad": forms.NumberInput(attrs={"class": "input"}),
+            "fecha_nacimiento": forms.DateInput(attrs={"type": "date", "class": "input"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user:
+            self.fields['first_name'].initial = user.first_name
+            self.fields['last_name'].initial = user.last_name
+            self.fields['email'].initial = user.email
+
+class PlanPagoForm(forms.ModelForm):
+    # Campos base para el plan
     class Meta:
         model = PlanPago
         fields = ("alumno", "monto_total", "num_cuotas")
         widgets = {
-            "alumno": forms.Select(attrs={"class": "input"}),
+            "alumno": forms.HiddenInput(), # Lo pasaremos por URL/Vista
             "monto_total": forms.NumberInput(attrs={"class": "input", "step": "0.01"}),
-            "num_cuotas": forms.NumberInput(attrs={"class": "input", "min": 1, "max": 4}),
+            "num_cuotas": forms.NumberInput(attrs={"class": "input", "min": 1, "max": 12}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["alumno"].queryset = User.objects.filter(
-            gym_profile__role=Profile.Role.ALUMNO
-        ).order_by("first_name", "username")
-
-    def save(self, commit=True):
-        from datetime import timedelta
-
-        from .models import Cuota
-
-        plan = super().save(commit=False)
-        if commit:
-            plan.save()
-            primera = self.cleaned_data["primera_cuota"]
-            gap = self.cleaned_data["dias_entre_cuotas"]
-            n = plan.num_cuotas
-            total = plan.monto_total
-            per = (total / n).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-            acum = Decimal("0")
-            for i in range(1, n + 1):
-                if i == n:
-                    monto = total - acum
-                else:
-                    monto = per
-                    acum += monto
-                venc = primera + timedelta(days=gap * (i - 1))
-                Cuota.objects.create(
-                    plan=plan,
-                    numero=i,
-                    monto=monto,
-                    fecha_vencimiento=venc,
-                )
-        return plan
+        # No necesitamos filtrar el queryset porque el alumno vendrá pre-asignado
 
 
 class ServicioPersonalizadoForm(forms.ModelForm):

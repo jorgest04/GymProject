@@ -20,6 +20,7 @@ urlpatterns = [
     path("admin-panel/planes/", views.admin_planes_lista, name="admin_planes"),
     path("admin-panel/cuota/<int:pk>/pagar/", views.admin_cuota_marcar_pagada, name="admin_cuota_pagar"),
     path("admin-panel/alumno/<int:user_id>/evaluacion/", views.admin_evaluacion_alumno, name="admin_evaluacion_alumno"),
+    path("admin-panel/alumno/<int:user_id>/editar/", views.admin_editar_alumno, name="admin_editar_alumno"),
     path("admin-panel/alumno/nuevo/", views.admin_crear_alumno, name="admin_crear_alumno"),
     path("mi-gimnasio/", views.alumno_portal, name="alumno_portal"),
     path("mi-gimnasio/perfil/", views.alumno_perfil, name="alumno_perfil"),
