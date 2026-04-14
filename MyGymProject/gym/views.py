@@ -17,7 +17,7 @@ from .forms import (
     PlanPagoForm,
     ServicioPersonalizadoForm,
 )
-from .models import Asistencia, Cuota, PlanPago, Profile
+from .models import Asistencia, Cuota, PlanPago, Profile, EvaluacionFisica
 
 def _profile(user):
     return getattr(user, "gym_profile", None)
@@ -135,8 +135,20 @@ def admin_evaluacion_alumno(request, user_id):
     profile = alumno.gym_profile
     form = EvaluacionFisicaForm(request.POST or None, instance=profile)
     if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, f"Evaluación de {alumno.get_full_name() or alumno.username} guardada.")
+        # Actualizamos el perfil (datos actuales)
+        profile = form.save()
+        
+        # Guardamos en el historial (nueva evaluación)
+        EvaluacionFisica.objects.create(
+            alumno=alumno,
+            peso_kg=profile.peso_kg or 0,
+            talla_cm=profile.talla_cm or 0,
+            porcentaje_grasa=profile.porcentaje_grasa or 0,
+            masa_muscular_kg=profile.masa_muscular_kg or 0,
+            observaciones=profile.observaciones
+        )
+        
+        messages.success(request, f"Evaluación de {alumno.get_full_name() or alumno.username} guardada e historial registrado.")
         return redirect("gym:admin_dashboard")
     return render(request, "gym/admin_evaluacion_form.html", {"form": form, "alumno": alumno})
 
@@ -167,11 +179,23 @@ def alumno_portal(request):
     dias_efectivos = profile.dias_efectivos_servicio()
     cuotas = Cuota.objects.filter(plan__alumno=request.user).select_related("plan").order_by("fecha_vencimiento")
     mis_asistencias = Asistencia.objects.filter(alumno=request.user).order_by("-fecha")[:30]
+    
+    # Datos para los gráficos
+    evaluaciones = EvaluacionFisica.objects.filter(alumno=request.user).order_by("fecha")
+    labels = [ev.fecha.strftime("%d/%m") for ev in evaluaciones]
+    pesos = [float(ev.peso_kg) for ev in evaluaciones]
+    grasas = [float(ev.porcentaje_grasa) for ev in evaluaciones]
+    musculo = [float(ev.masa_muscular_kg) for ev in evaluaciones]
+
     return render(request, "gym/alumno_portal.html", {
         "profile": profile,
         "dias_efectivos": dias_efectivos,
         "cuotas": cuotas,
         "mis_asistencias": mis_asistencias,
+        "chart_labels": labels,
+        "chart_pesos": pesos,
+        "chart_grasas": grasas,
+        "chart_musculo": musculo,
     })
 
 @alumno_required

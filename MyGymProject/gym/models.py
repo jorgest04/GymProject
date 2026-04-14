@@ -83,6 +83,28 @@ class Profile(models.Model):
         return self.congelado_desde is not None
 
 
+class EvaluacionFisica(models.Model):
+    alumno = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="evaluaciones",
+    )
+    fecha = models.DateField(default=timezone.now)
+    peso_kg = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Peso (kg)")
+    talla_cm = models.PositiveSmallIntegerField(verbose_name="Talla (cm)")
+    porcentaje_grasa = models.DecimalField(max_digits=4, decimal_places=1, verbose_name="% Grasa")
+    masa_muscular_kg = models.DecimalField(max_digits=5, decimal_places=2, verbose_name="Masa Muscular (kg)")
+    observaciones = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = "Evaluación Física"
+        verbose_name_plural = "Evaluaciones Físicas"
+        ordering = ["-fecha"]
+
+    def __str__(self):
+        return f"{self.alumno} - {self.fecha}"
+
+
 class Asistencia(models.Model):
     alumno = models.ForeignKey(
         settings.AUTH_USER_MODEL,

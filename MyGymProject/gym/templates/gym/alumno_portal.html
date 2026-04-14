@@ -64,6 +64,77 @@
     </div>
 </div>
 
+{% if chart_labels %}
+<div class="card" style="margin-top: 20px; border-top: 5px solid #27ae60;">
+    <h2 style="margin-bottom: 20px;">📊 Gráficos de Progreso Personal</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h3 style="text-align: center; color: #2c3e50; font-size: 1rem;">Evolución del Peso (kg)</h3>
+            <canvas id="pesoChart" height="150"></canvas>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h3 style="text-align: center; color: #2c3e50; font-size: 1rem;">Composición Corporal (%)</h3>
+            <canvas id="composicionChart" height="150"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = {{ chart_labels|safe }};
+    
+    // Configuración común
+    const commonOptions = {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { y: { beginAtZero: false } }
+    };
+
+    // Gráfico de Peso
+    new Chart(document.getElementById('pesoChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Peso (kg)',
+                data: {{ chart_pesos|safe }},
+                borderColor: '#2980b9',
+                backgroundColor: 'rgba(41, 128, 185, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: commonOptions
+    });
+
+    // Gráfico de Composición
+    new Chart(document.getElementById('composicionChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: '% Grasa',
+                    data: {{ chart_grasas|safe }},
+                    borderColor: '#e67e22',
+                    borderWidth: 2,
+                    tension: 0.4
+                },
+                {
+                    label: 'Músculo (kg)',
+                    data: {{ chart_musculo|safe }},
+                    borderColor: '#27ae60',
+                    borderWidth: 2,
+                    tension: 0.4
+                }
+            ]
+        },
+        options: commonOptions
+    });
+</script>
+{% endif %}
+
 <div class="card" style="margin-top: 20px; border-top: 5px solid #f1c40f;">
     <h2>💰 Mis Planes y Pagos Pendientes</h2>
     <table style="width: 100%;">

@@ -50,6 +50,16 @@
             </td>
             <td style="text-align: right;">
               {% if not c.pagado %}
+                <!-- Botón de WhatsApp -->
+                {% if plan.alumno.gym_profile.whatsapp %}
+                  <a href="https://wa.me/{{ plan.alumno.gym_profile.whatsapp }}?text=Hola%20{{ plan.alumno.first_name|default:plan.alumno.username }},%20te%20saludamos%20de%20FitnessIQ.%20Te%20recordamos%20que%20tu%20cuota%20S/.%20{{ c.monto }}%20vence%20el%20{{ c.fecha_vencimiento|date:'d/m/Y' }}.%20¡Te%20esperamos!" 
+                     target="_blank" 
+                     class="btn btn-sm btn-ghost" 
+                     style="background: #25d366; color: white; border: none; margin-right: 5px;">
+                     📱 Recordar
+                  </a>
+                {% endif %}
+
                 <form method="post" action="{% url 'gym:admin_cuota_pagar' c.pk %}" style="display:inline;">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-sm btn-primary">Marcar Pagada</button>
