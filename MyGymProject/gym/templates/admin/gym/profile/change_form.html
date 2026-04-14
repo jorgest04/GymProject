@@ -1,0 +1,14 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+  {% if original and original.user_id %}
+    <li>
+      <a href="{% url 'admin:gym_planpago_changelist' %}?alumno__id__exact={{ original.user_id }}">
+        Editar planes
+      </a>
+    </li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
+
