@@ -230,7 +230,16 @@ def admin_editar_alumno(request, user_id):
         alumno.save()
         messages.success(request, f"Datos de {alumno.username} actualizados.")
         return redirect("gym:admin_dashboard")
-    return render(request, "gym/admin_crear_alumno.html", {"form": form, "titulo": f"Editar Alumno: {alumno.username}"})
+    return render(
+        request,
+        "gym/admin_crear_alumno.html",
+        {
+            "form": form,
+            "titulo": f"Editar Alumno: {alumno.username}",
+            "es_edicion": True,
+            "alumno": alumno,
+        },
+    )
 
 @admin_required
 def admin_asistencias_por_alumno(request):

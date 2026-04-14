@@ -1,14 +1,23 @@
 {% extends "gym/base.html" %}
 {% block title %}Crear alumno{% endblock %}
 {% block content %}
-<h1>Crear usuario alumno</h1>
+<h1>{{ titulo|default:"Crear usuario alumno" }}</h1>
+
+{% if es_edicion and alumno %}
+  <div style="margin-bottom: 15px;">
+    <a href="{% url 'gym:admin_planes' %}?alumno={{ alumno.id }}" class="btn btn-primary">Editar planes</a>
+  </div>
+{% endif %}
+
 <form method="post">
   {% csrf_token %}
   {% for field in form %}
     {{ field.label_tag }}{{ field }}{{ field.errors }}
   {% endfor %}
   <div class="form-actions">
-    <button type="submit" class="btn btn-primary">Crear</button>
+    <button type="submit" class="btn btn-primary">
+      {% if es_edicion %}Guardar cambios{% else %}Crear{% endif %}
+    </button>
     <a class="btn btn-ghost" href="{% url 'gym:admin_dashboard' %}">Volver</a>
   </div>
 </form>
