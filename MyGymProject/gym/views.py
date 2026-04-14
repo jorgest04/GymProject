@@ -106,9 +106,24 @@ from decimal import Decimal, ROUND_HALF_UP
 def admin_plan_pago_nuevo(request):
     user_id = request.GET.get("alumno")
     alumno = get_object_or_404(User, pk=user_id) if user_id else None
+    
+    # VALIDACIÓN: Verificar si el alumno ya tiene un plan
+    if alumno:
+        plan_existente = PlanPago.objects.filter(alumno=alumno).first()
+        if plan_existente:
+            ultima_cuota = plan_existente.cuotas.order_by("-fecha_vencimiento").first()
+            fecha_venc = ultima_cuota.fecha_vencimiento.strftime("%d/%m/%Y") if ultima_cuota else "desconocida"
+            messages.warning(request, f"⚠️ El alumno {alumno.first_name} ya tiene un plan activo. El vencimiento de su última cuota es el {fecha_venc}. No se puede crear otro plan hasta finalizar el actual.")
+            return redirect("gym:admin_dashboard")
+
     form = PlanPagoForm(request.POST or None, initial={"alumno": alumno})
     
     if request.method == "POST" and form.is_valid():
+        # (Re-verificación por seguridad en el POST)
+        if PlanPago.objects.filter(alumno=form.cleaned_data['alumno']).exists():
+            messages.error(request, "Error: Este alumno ya cuenta con un plan registrado.")
+            return redirect("gym:admin_dashboard")
+            
         plan = form.save()
         n = plan.num_cuotas
         total = plan.monto_total
